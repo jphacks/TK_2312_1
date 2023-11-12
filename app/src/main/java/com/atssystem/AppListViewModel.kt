@@ -6,9 +6,10 @@ import android.os.Build
 import androidx.lifecycle.ViewModel
 import com.atssystem.model.AppItem
 
-class HomeViewModel(
-    val pm: PackageManager
+class AppListViewModel(
+    private val pm: PackageManager
 ): ViewModel() {
+
     val appItems: List<AppItem> by lazy {
         loadAllApps()
     }
@@ -25,7 +26,6 @@ class HomeViewModel(
         } else {
             pm.queryIntentActivities(mainIntent, 0)
         }
-
         val list = mutableListOf<AppItem>()
         for(info in resolvedInfos) {
             list.add(

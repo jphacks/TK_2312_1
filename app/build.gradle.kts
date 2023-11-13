@@ -95,6 +95,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     //moshi
     implementation("com.squareup.moshi:moshi:1.14.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+
     //Jsoup
     implementation("org.jsoup:jsoup:1.16.2")
 

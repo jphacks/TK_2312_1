@@ -6,10 +6,13 @@ import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
+import com.atssystem.database.ClauseDatabase
 
-class ViewModelFactory constructor(
+class ViewModelFactory(
     private val pm: PackageManager,
     owner: SavedStateRegistryOwner,
+    private val appItemRepository: AppItemRepository,
+    private val clauseRepository: ClauseRepository,
     defaultArgs: Bundle? = null
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
@@ -21,7 +24,7 @@ class ViewModelFactory constructor(
     ) = with(modelClass) {
         when {
             isAssignableFrom(AppDetailViewModel::class.java) ->
-                AppDetailViewModel(pm, handle,appId)
+                AppDetailViewModel(pm, handle,appId, appItemRepository, clauseRepository)
             isAssignableFrom(AppListViewModel::class.java) ->
                 AppListViewModel(pm)
             else ->

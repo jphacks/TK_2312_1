@@ -5,6 +5,10 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.atssystem.http.AnalyzeToPRepository
+import com.atssystem.http.Result
+import com.atssystem.http.RiskyClausesResponse
+import com.atssystem.model.Clause
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -13,13 +17,17 @@ import kotlinx.coroutines.launch
 class AppDetailViewModel(
     private val pm: PackageManager,
     savedStateHandle: SavedStateHandle,
-    packageName: String
+    val packageName: String,
+    private val appItemRepository: AppItemRepository,
+    private val clauseRepository: ClauseRepository
 ): ViewModel() {
+    val analyzeRepository = AnalyzeToPRepository()
 
     private val _uiState = MutableStateFlow(
         UiState(
             packageName = packageName,
-            isAnalyzed = false
+            isAnalyzed = false,
+            list = listOf()
         )
     )
 
@@ -32,17 +40,31 @@ class AppDetailViewModel(
     fun getAppName() =
         pm.getApplicationInfo(uiState.value.packageName, 0).loadLabel(pm).toString()
 
-    fun setNewApp(packageName: String){
-        _uiState.update { UiState(packageName, false) }
-    }
-
     fun startAnalyze(){
         viewModelScope.launch {
+            val result = analyzeRepository.analyzeToP(uiState.value.packageName)
+            when(result) {
+                is Result.Success<RiskyClausesResponse> -> {
+                    _uiState.value = UiState(
+                        packageName = packageName,
+                        isAnalyzed = true,
+                        list = result.data.clauseList
+                    )
+                }
+                else -> {
+                    //TODO
+                }
+            }
         }
+    }
+
+    fun saveRiskyClauses() {
+
     }
 }
 
 data class UiState(
     val packageName: String,
-    val isAnalyzed: Boolean
+    val isAnalyzed: Boolean,
+    val list: List<Clause>
 )

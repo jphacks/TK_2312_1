@@ -1,7 +1,11 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+
 }
 
 android {
@@ -19,6 +23,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        val key: String = gradleLocalProperties(rootDir).getProperty("OPENAI_APIKEY") ?: ""
+        buildConfigField("String", "OPENAI_APIKEY", "\"$key\"")
     }
 
     buildTypes {
@@ -40,6 +46,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
@@ -93,6 +100,7 @@ dependencies {
 
     //retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     //moshi
     implementation("com.squareup.moshi:moshi:1.14.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
@@ -105,7 +113,8 @@ dependencies {
 
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
-
-    // To use Kotlin annotation processing tool (kapt)
     ksp("androidx.room:room-compiler:$room_version")
+
+    //jackson
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
 }

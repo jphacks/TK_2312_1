@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -43,6 +44,8 @@ fun AppDetailScreen(
     viewModel: AppDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isAnalyzing by viewModel.isAnalyzing.collectAsState()
+
     val drawable = viewModel.getIconImage()
 
     Column {
@@ -54,6 +57,11 @@ fun AppDetailScreen(
                 viewModel.startAnalyze()
             }
         }
+
+        if(isAnalyzing) {
+            CircularProgressIndicator()
+        }
+
     }
 }
 
@@ -77,8 +85,8 @@ fun AnalyzeButton(onStartAnalyze:() -> Unit){
     var isClicked = false
     Button(onClick = {
         if(!isClicked) {
-            onStartAnalyze
             isClicked = true
+            onStartAnalyze()
         }
     }) {
        Text(text = "プライバシーポリシーを分析する")

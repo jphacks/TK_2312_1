@@ -23,6 +23,7 @@ class AppDetailViewModel(
 ): ViewModel() {
     val analyzeRepository = AnalyzeToPRepository()
 
+
     private val _uiState = MutableStateFlow(
         UiState(
             packageName = packageName,
@@ -32,6 +33,10 @@ class AppDetailViewModel(
     )
 
     val uiState = _uiState.asStateFlow()
+
+    private val _isAnalyzing = MutableStateFlow(false)
+    val isAnalyzing = _isAnalyzing.asStateFlow()
+
     fun getIconImage(): Drawable {
         val appInfo = pm.getApplicationInfo(uiState.value.packageName, 0)
         return appInfo.loadIcon(pm)
@@ -41,10 +46,12 @@ class AppDetailViewModel(
         pm.getApplicationInfo(uiState.value.packageName, 0).loadLabel(pm).toString()
 
     fun startAnalyze(){
+        _isAnalyzing.value = true
         viewModelScope.launch {
             val result = analyzeRepository.analyzeToP(uiState.value.packageName)
             when(result) {
                 is Result.Success<RiskyClausesResponse> -> {
+                    _isAnalyzing.value = false
                     _uiState.value = UiState(
                         packageName = packageName,
                         isAnalyzed = true,

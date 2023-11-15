@@ -7,10 +7,8 @@ import com.atssystem.model.ClauseList
 import com.atssystem.model.SingleClause
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext

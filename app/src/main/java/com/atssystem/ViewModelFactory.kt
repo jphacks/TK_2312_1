@@ -6,13 +6,15 @@ import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
+import com.atssystem.database.AppItemDatabase
 import com.atssystem.database.ClauseDatabase
+import com.atssystem.model.Clause
 
 class ViewModelFactory(
     private val pm: PackageManager,
     owner: SavedStateRegistryOwner,
-    private val appItemRepository: AppItemRepository,
-    private val clauseRepository: ClauseRepository,
+    private val appItemDB: AppItemDatabase,
+    private val clauseDB: ClauseDatabase,
     defaultArgs: Bundle? = null
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
@@ -24,9 +26,9 @@ class ViewModelFactory(
     ) = with(modelClass) {
         when {
             isAssignableFrom(AppDetailViewModel::class.java) ->
-                AppDetailViewModel(pm, handle,appId, appItemRepository, clauseRepository)
+                AppDetailViewModel(pm, handle,appId, appItemDB, clauseDB)
             isAssignableFrom(AppListViewModel::class.java) ->
-                AppListViewModel(pm)
+                AppListViewModel(pm, appItemDB)
             else ->
                 throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

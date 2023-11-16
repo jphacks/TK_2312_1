@@ -117,4 +117,8 @@ dependencies {
 
     //jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+
+    //work manager
+    val work_version = "2.8.1"
+    implementation("androidx.work:work-runtime-ktx:$work_version")
 }

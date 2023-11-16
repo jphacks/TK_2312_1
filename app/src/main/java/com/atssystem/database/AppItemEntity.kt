@@ -11,4 +11,9 @@ data class AppItemEntity(
     val packageName: String,
     @ColumnInfo(name = "warning_num")
     val warnings: Int,
+    @ColumnInfo(name = "app_name")
+    val appName: String,
+    /*
+    This is an application label.
+     */
 )

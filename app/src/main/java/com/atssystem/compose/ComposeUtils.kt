@@ -17,26 +17,17 @@ fun getViewModelFactory(defaultArgs: Bundle? = null): ViewModelFactory {
     return ViewModelFactory(
         pm = pm,
         LocalSavedStateRegistryOwner.current,
-        AppItemRepository(getAppItemDatabase()),
-        ClauseRepository(getClauseDatabase()),
+        getAppItemDatabase(),
+        getClauseDatabase(),
         defaultArgs)
 }
 
 @Composable
 fun getAppItemDatabase(): AppItemDatabase {
-    val db = Room.databaseBuilder(
-        LocalContext.current.applicationContext,
-        AppItemDatabase::class.java, "app_infos"
-    ).build()
-    return db
+    return AppItemDatabase.getInstance(LocalContext.current.applicationContext)
 }
 
 @Composable
 fun getClauseDatabase(): ClauseDatabase {
-    val db = Room.databaseBuilder(
-        LocalContext.current.applicationContext,
-        ClauseDatabase::class.java, "risky_clause"
-    ).build()
-
-    return db
+    return ClauseDatabase.getInstance(LocalContext.current.applicationContext)
 }

@@ -6,5 +6,5 @@ data class AppItem(
     val packageName: String,
     val warnings: Int,
     val appName: String,
-    val icon: Drawable
+    val icon: Drawable?
 )

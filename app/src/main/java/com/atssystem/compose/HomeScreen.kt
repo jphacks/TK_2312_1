@@ -14,6 +14,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,7 +32,9 @@ fun HomeScreen(
     onAppClick: (String) -> Unit,
     viewModel: AppListViewModel,
 ) {
-    AppList(apps = viewModel.appItems, onAppClick)
+    val appItems by viewModel.appItems.collectAsState()
+
+    AppList(apps = appItems, onAppClick)
 }
 
 @Composable
@@ -74,5 +78,3 @@ fun AppList(
     }
 }
 
-fun getWarningColor(warnings: Int) {
-}

@@ -13,4 +13,7 @@ interface AppItemDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun saveAppItem(appItemEntity: AppItemEntity)
+
+    @Insert
+    fun saveAll(appItems: List<AppItemEntity> )
 }

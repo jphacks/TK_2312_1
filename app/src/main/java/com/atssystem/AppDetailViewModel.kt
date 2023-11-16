@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.atssystem.database.AppItemDatabase
+import com.atssystem.database.ClauseDatabase
 import com.atssystem.http.AnalyzeToPRepository
 import com.atssystem.http.Result
 import com.atssystem.http.RiskyClausesResponse
@@ -18,11 +20,10 @@ class AppDetailViewModel(
     private val pm: PackageManager,
     savedStateHandle: SavedStateHandle,
     val packageName: String,
-    private val appItemRepository: AppItemRepository,
-    private val clauseRepository: ClauseRepository
+    private val appItemDB: AppItemDatabase,
+    private val clauseDB:  ClauseDatabase
 ): ViewModel() {
     val analyzeRepository = AnalyzeToPRepository()
-
 
     private val _uiState = MutableStateFlow(
         UiState(

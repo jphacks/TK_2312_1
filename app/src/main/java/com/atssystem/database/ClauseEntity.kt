@@ -9,6 +9,8 @@ import com.atssystem.model.Clause
 @Entity(tableName = "risky_clause")
 data class ClauseEntity(
     @PrimaryKey
+    @ColumnInfo(name = "uuid")
+    val uuid: String,
     @ColumnInfo(name = "package_name")
     val packageName: String,
     @Embedded

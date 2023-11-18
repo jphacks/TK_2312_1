@@ -65,7 +65,11 @@ fun AppList(
                 }
 
                 Button(onClick = {onAppClick(it.packageName)}) {
-                    Text("${it.warnings} warnings")
+                    if(it.warnings == -1) {
+                        Text(text = "未解析")
+                    } else {
+                        Text("${it.warnings} warnings")
+                    }
                 }
             }
             Divider(

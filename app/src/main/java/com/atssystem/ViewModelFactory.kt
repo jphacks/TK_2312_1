@@ -18,7 +18,8 @@ class ViewModelFactory(
     defaultArgs: Bundle? = null
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
-    val appId = defaultArgs?.getString("packageName") ?: ""
+    private val appId = defaultArgs?.getString("packageName") ?: ""
+    private val isAnalyzed = defaultArgs?.getBoolean("isAnalyzed") ?: false
     override fun <T : ViewModel> create(
         key: String,
         modelClass: Class<T>,

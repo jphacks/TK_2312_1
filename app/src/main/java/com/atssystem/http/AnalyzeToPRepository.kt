@@ -2,6 +2,7 @@ package com.atssystem.http
 
 import android.util.Log
 import com.atssystem.BuildConfig
+import com.atssystem.RetryInterceptor
 import com.atssystem.model.Clause
 import com.atssystem.model.ClauseList
 import com.atssystem.model.SingleClause
@@ -26,7 +27,20 @@ import java.util.concurrent.TimeUnit
 
 class AnalyzeToPRepository() {
 
-    val prefixPrompt = "サービスを利用する際には多くの場合利用規約に同意することが求められますが、人々は利用規約をよく読まずに同意しています。その行為には、利用規約に書かれた利用者にとって不利な条項にも同意してしまうという潜在的な危険性をはらんでいます。あなたは人々をそのような危険から守る有能なアシスタントです。利用規約から危険性を孕む条項を抜き出し、risky_clausesというkeyのvalueとして、それが何条何項かをclause、その危険性の要約をsummary、その危険性の詳細をdescriptionというkeyにして列挙して、JSON形式で私に教えて下さい。もし一つしか危険を孕む条項がなくても、JSONは配列形式を保ってください。もちろんそのような危険のない利用規約もありますので、その場合にはrisky_clausesは使わずに、noneというkeyだけを作って、そこに”null”と入れてください。本当に危険だと思うものだけ教えて下さい。"
+    val prefixPrompt = "サービスを利用する際には多くの場合利用規約に同意することが求められますが、人々は利用規約をよく読まずに同意しています。" +
+            "その行為には、利用規約に書かれた利用者にとって不利な条項にも同意してしまうという潜在的な危険性をはらんでいます。あなたは人々をそのような危険から守る有能なアシスタントです。" +
+            "出力例は以下のルールのようにしてください. また,hoge,huga,piyo,hego,hagu,poyiは例なので実際には出力しないでください." +
+            "# ルール " +
+            "- summaryには危険な理由を要約したものが入ります。なるべく短くしてください。目安は30字以内です " +
+            "- clauseには危険な箇所を抜き出してきた文章が入ります " +
+            "- descriptionにはその利用規約が危険である理由の文章が入ります.リッチに出力してください. " +
+            "- 全て日本語のJSONファイルで出力してください" +
+            "- 危険な箇所がいくつかある場合は危険性の高いものから順に2つまで教えて下さい。 " +
+            "- 本当に人々が知る必要のある箇所だけ教えて下さい。 " +
+            "- 入力には利用規約とは関係のない内容が含まれることがありますが、その部分は分析しないでください。 " +
+            "JSONの一番最初のkeyはrisky_clausesとしてください。そして、summary, clause, descriptionの三つのkeyを持つものの配列をその中に入れてください。配列の中身が何もなくても、配列の形式で返してください。"
+
+
 
     suspend fun analyzeToP(packageName: String): Result<RiskyClausesResponse> {
         when(val privacyLinkResponse = makeGetToPRequest(packageName)) {
@@ -82,8 +96,9 @@ class AnalyzeToPRepository() {
                 chain.proceed(request)
             }
         )
-            .connectTimeout(1, TimeUnit.MINUTES)
-            .readTimeout(1, TimeUnit.MINUTES)
+            .addInterceptor(RetryInterceptor())
+            .connectTimeout(2, TimeUnit.MINUTES)
+            .readTimeout(20, TimeUnit.SECONDS)
             .build()
 
         val retrofit = Retrofit.Builder()
@@ -129,7 +144,7 @@ class AnalyzeToPRepository() {
           "max_tokens": 4096,
           "response_format": {"type": "json_object"}
         }
-        """
+        """.trimIndent()
         val requestBody = RequestBody.create(MediaType.get("application/json; charset=utf-8"), rawJson)
         val response = apiService.getRiskyClauses(requestBody)
         if(response.isSuccessful) {
@@ -147,6 +162,9 @@ class AnalyzeToPRepository() {
             } else {
                 val adapter = moshi.adapter(SingleClause::class.java)
                 val clause = adapter.fromJson(content) ?: Clause("","","")
+                if(clause is SingleClause) {
+                    return listOf(clause.riskyClause ?: Clause("","",""))
+                }
                 return listOf(clause as Clause)
             }
 
@@ -184,7 +202,7 @@ class AnalyzeToPRepository() {
     }
 
     private fun splitJapaneseText(text: String, maxLength: Int): List<String> {
-        val regex = Regex("""第(\d+)条""")
+        val regex = Regex("。")
         val matches = regex.findAll(text)
         val indices = matches.map { it.range.first }.toList() + listOf(text.length)
 

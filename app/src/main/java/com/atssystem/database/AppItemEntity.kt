@@ -13,6 +13,10 @@ data class AppItemEntity(
     val warnings: Int,
     @ColumnInfo(name = "app_name")
     val appName: String,
+    @ColumnInfo(name = "is_installed_lately")
+    val isInstalledLately: Boolean,
+    @ColumnInfo(name = "unix_time")
+    val time: Long
     /*
     This is an application label.
      */

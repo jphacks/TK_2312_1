@@ -1,6 +1,7 @@
 package com.atssystem.database
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.atssystem.model.Clause
@@ -13,4 +14,7 @@ interface ClauseDao {
 
     @Insert
     fun saveNewClauses(list: List<ClauseEntity>)
+
+    @Query("DELETE FROM risky_clause where package_name = :packageName")
+    fun DeletePreClauses(packageName: String)
 }

@@ -35,10 +35,10 @@
         </activity>
 
         <receiver
-            android:name=".receiver.PackageChangedReceiver"
+            android:name=".receiver.PhoneBootedReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <data android:scheme="package"/>
             </intent-filter>
         </receiver>

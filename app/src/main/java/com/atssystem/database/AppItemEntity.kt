@@ -16,7 +16,9 @@ data class AppItemEntity(
     @ColumnInfo(name = "is_installed_lately")
     val isInstalledLately: Boolean,
     @ColumnInfo(name = "unix_time")
-    val time: Long
+    val time: Long,
+    @ColumnInfo(name = "url")
+    val url: String
     /*
     This is an application label.
      */

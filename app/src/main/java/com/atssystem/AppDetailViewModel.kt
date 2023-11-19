@@ -12,6 +12,7 @@ import com.atssystem.database.ClauseDatabase
 import com.atssystem.database.ClauseEntity
 import com.atssystem.http.AnalyzeToPRepository
 import com.atssystem.http.Result
+import com.atssystem.http.RiskyClauseWithURLResponse
 import com.atssystem.http.RiskyClausesResponse
 import com.atssystem.model.Clause
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,9 @@ class AppDetailViewModel(
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
 
+    private val  _url = MutableStateFlow("")
+    val url = _url.asStateFlow()
+
     var appItemPreEntity: AppItemEntity? = null
 
     fun getIconImage(): Drawable {
@@ -67,7 +71,7 @@ class AppDetailViewModel(
             withContext(Dispatchers.IO) {
                 val result = analyzeRepository.analyzeToP(uiState.value.packageName)
                 when (result) {
-                    is Result.Success<RiskyClausesResponse> -> {
+                    is Result.Success<RiskyClauseWithURLResponse> -> {
                         _isAnalyzing.value = false
                         clauseDB.clauseDao().DeletePreClauses(packageName)
                         clauseDB.clauseDao().saveNewClauses(result.data.clauseList.map {
@@ -83,9 +87,11 @@ class AppDetailViewModel(
                                 warnings = result.data.clauseList.size,
                                 appName = appItemPreEntity!!.appName,
                                 isInstalledLately = true,
-                                time = appItemPreEntity!!.time
+                                time = appItemPreEntity!!.time,
+                                url = result.data.url
                             )
                         )
+                        _url.value = result.data.url
                         _uiState.value = UiState(
                             packageName = packageName,
                             isAnalyzed = true,

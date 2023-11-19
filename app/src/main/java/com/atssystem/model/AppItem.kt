@@ -7,5 +7,6 @@ data class AppItem(
     val warnings: Int,
     val appName: String,
     val icon: Drawable?,
-    val time: Long
+    val time: Long,
+    val url: String?
 )

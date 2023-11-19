@@ -22,6 +22,7 @@ import com.atssystem.database.ClauseEntity
 import com.atssystem.getCurrentUnixTime
 import com.atssystem.http.AnalyzeToPRepository
 import com.atssystem.http.Result
+import com.atssystem.http.RiskyClauseWithURLResponse
 import com.atssystem.http.RiskyClausesResponse
 import com.atssystem.model.AppItem
 import com.atssystem.model.Clause
@@ -49,7 +50,7 @@ class PackageSearchWorker(private val appContext: Context, workerParameters: Wor
             Log.d("PackageSearchWorker",item.packageName+" is lately installed.")
             runBlocking {
                 val result = repository.analyzeToP(item.packageName)
-                if(result is com.atssystem.http.Result.Success<RiskyClausesResponse>) {
+                if(result is com.atssystem.http.Result.Success<RiskyClauseWithURLResponse>) {
                     val clauseList = result.data.clauseList.map {
                         ClauseEntity(
                             uuid = UUID.randomUUID().toString(),
@@ -64,7 +65,8 @@ class PackageSearchWorker(private val appContext: Context, workerParameters: Wor
                         warnings = clauseList.size,
                         appName = item.appName,
                         isInstalledLately = true,
-                        time = item.time)
+                        time = item.time,
+                        url = result.data.url)
                     appItemDatabase.appItemDao().saveAppItem(appitem)
 
                     pushNotification(appContext,item.packageName, appitem.appName)
@@ -124,7 +126,8 @@ class PackageSearchWorker(private val appContext: Context, workerParameters: Wor
                     warnings = -1,
                     appName = info.applicationInfo.loadLabel(pm).toString(),
                     icon = null,
-                    time = getCurrentUnixTime()
+                    time = getCurrentUnixTime(),
+                    url = null
                 )
             )
         }
@@ -140,7 +143,8 @@ class PackageSearchWorker(private val appContext: Context, workerParameters: Wor
                 warnings = -1,
                 appName = it.appName,
                 time = getCurrentUnixTime(),
-                isInstalledLately = true
+                isInstalledLately = true,
+                url = ""
             )
         })
 

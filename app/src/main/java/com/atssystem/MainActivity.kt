@@ -53,6 +53,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                delay(120*1000)
+                val searchRequest = PeriodicWorkRequestBuilder<PackageSearchWorker>(PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
+                    .build()
+                WorkManager.getInstance(applicationContext).enqueue(searchRequest)
+            }
+        }
         setContent {
              AtsSystemApp(
                  startDestination = startDestination,
@@ -74,7 +82,8 @@ class MainActivity : ComponentActivity() {
                     warnings = -1,
                     appName = info.applicationInfo.loadLabel(pm).toString(),
                     icon = info.applicationInfo.loadIcon(pm),
-                    time = 0
+                    time = 0,
+                    url = null
                 )
             )
         }
@@ -85,7 +94,8 @@ class MainActivity : ComponentActivity() {
                 warnings = 0,
                 appName = it.appName,
                 isInstalledLately = false,
-                time = it.time
+                time = it.time,
+                url = ""
             )
         }
 

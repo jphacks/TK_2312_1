@@ -1,6 +1,7 @@
 package com.atssystem.compose
 
 import android.graphics.drawable.Drawable
+import android.widget.Space
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -28,7 +30,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -43,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,6 +58,7 @@ import com.atssystem.R
 import com.atssystem.R.drawable
 import com.atssystem.model.Clause
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import kotlinx.coroutines.flow.collect
 
 @Composable
 fun AppDetailScreen(
@@ -63,6 +69,7 @@ fun AppDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isAnalyzing by viewModel.isAnalyzing.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val url by viewModel.url.collectAsState()
 
     val drawable = viewModel.getIconImage()
 
@@ -75,10 +82,10 @@ fun AppDetailScreen(
                 CircularProgressIndicator()
             } else {
                 if (uiState.isAnalyzed && !isAnalyzing) {
-                    NotAnalyzed {
-                        viewModel.startAnalyze()
-                    }
-                    Analyzed(list = uiState.list)
+//                    NotAnalyzed {
+//                        viewModel.startAnalyze()
+//                    }
+                    Analyzed(list = uiState.list,url)
                 } else if(!isAnalyzing) {
                     NotAnalyzed {
                         viewModel.startAnalyze()
@@ -166,7 +173,14 @@ fun NotAnalyzed(onStartAnalyze: () -> Unit) {
 }
 
 @Composable
-fun Analyzed(list: List<Clause>) {
+fun Analyzed(list: List<Clause>, url: String) {
+    Column {
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = "解析したプライバシーポリシー", fontSize = 16.sp, modifier = Modifier.padding(start = 16.dp))
+        SelectionContainer {
+            Text(text = url, color = Color.Blue, fontSize = 16.sp, modifier = Modifier.padding(start = 16.dp, end = 16.dp))
+        }
+    }
     ClauseList(list = list)
 }
 
@@ -200,7 +214,10 @@ fun ClauseList(list: List<Clause>) {
 @Composable
 fun ClauseItem(clause: Clause) {
     Card(
-        modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
+        modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent,
+        )
     ) {
         ClauseContent(clause = clause)
     }
@@ -209,43 +226,70 @@ fun ClauseItem(clause: Clause) {
 @Composable
 fun ClauseContent(clause: Clause) {
     var expanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .padding(12.dp)
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessHigh
-                )
-            )
-    ) {
-        Column(
+    Column {
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .padding(4.dp)
+                .padding(8.dp)
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessHigh
+                    )
+                )
         ) {
-            Text(clause.summary, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            if (expanded) {
-                Text(clause.description, fontSize = 12.sp)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp)
+            ) {
+                Text(clause.summary, fontSize = 16.sp, color = Color.DarkGray, fontWeight = FontWeight.Bold )
+            }
+            IconButton(onClick = { expanded = !expanded }) {
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp
+                    else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "This is an icon"
+                )
             }
         }
-        IconButton(onClick = { expanded = !expanded }) {
-            Icon(
-                imageVector = if (expanded) Icons.Filled.KeyboardArrowUp
-                else Icons.Filled.KeyboardArrowDown,
-                contentDescription = "This is an icon"
-            )
+
+        if (expanded) {
+            Row(modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
+                .fillMaxWidth()) {
+                Spacer(modifier = Modifier.width(4.dp))
+                Box(modifier = Modifier
+                    .background(Color(240, 240, 240))
+                    .weight(1f)) {
+                    Text(
+                        text = "引用：\n" + clause.clause,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(8.dp),
+                        color = Color.DarkGray,
+                        fontWeight = FontWeight.Light)
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Text(clause.description, fontSize = 16.sp, modifier = Modifier.padding(12.dp), color = Color.DarkGray)
         }
+
+        Divider(
+            color = Color.LightGray,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .padding(start = 8.dp, end = 8.dp)
+        )
     }
+
+
 }
 
 @Preview
 @Composable
 fun previewClauseContent() {
     val clause = Clause(
-        clause = "kk",
+        clause = "利用規約の変更に同意しない場合、サービスの使用停止や規約の解除が可能",
         summary = "利用規約の変更に同意しない場合、サービスの使用停止や規約の解除が可能",
         description = "利用者が利用規約の変更に同意しない場合、サービスの使用停止や規約の解除が可能とされており、利用者にとって不利な変更が行われた場合でも、それに同意しなければならないという点で危険性がある。また、利用者が規定に違反した場合にも、事前の通知なしにサービスの一部または全部の使用停止や規約の解除が行われる可能性がある。"
     )

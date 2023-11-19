@@ -2,6 +2,7 @@ package com.atssystem.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,8 +43,10 @@ fun AppList(
     apps: List<AppItem>,
     onAppClick: (String) -> Unit
 ) {
-    LazyColumn() {
-        items(apps) {
+
+    Column() {
+        Text(text = "最近インストールしたアプリ", fontSize = 24.sp, modifier = Modifier.padding(16.dp))
+        for (i in apps) {
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
@@ -55,20 +58,20 @@ fun AppList(
                     verticalAlignment = Alignment.CenterVertically
                 ){
                     Image(
-                        painter = rememberDrawablePainter(drawable = it.icon),
+                        painter = rememberDrawablePainter(drawable = i.icon),
                         contentDescription = "this is a icon",
                         modifier = Modifier.size(32.dp))
-                    Text(it.appName,
+                    Text(i.appName,
                         fontSize = 16.sp,
                         modifier = Modifier.padding(start = 16.dp))
 
                 }
 
-                Button(onClick = {onAppClick(it.packageName)}) {
-                    if(it.warnings == -1) {
+                Button(onClick = {onAppClick(i.packageName)}) {
+                    if(i.warnings == -1) {
                         Text(text = "未解析")
                     } else {
-                        Text("${it.warnings} warnings")
+                        Text("${i.warnings} warnings")
                     }
                 }
             }

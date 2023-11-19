@@ -49,7 +49,8 @@ class AppListViewModel(
                         warnings = -1,
                         appName = info.applicationInfo.loadLabel(pm).toString(),
                         icon = null,
-                        time = 0
+                        time = 0,
+                        url = null
                     )
                 )
             }
@@ -70,7 +71,8 @@ class AppListViewModel(
                         warnings = -1,
                         appName = it.appName,
                         isInstalledLately = true,
-                        time = getCurrentUnixTime()
+                        time = getCurrentUnixTime(),
+                        url = ""
                     ) }
             )
 
@@ -80,7 +82,8 @@ class AppListViewModel(
                     warnings = it.warnings,
                     appName = it.appName,
                     icon = pm.getApplicationIcon(pm.getApplicationInfo(it.packageName, 0)),
-                    time = it.time
+                    time = it.time,
+                    url = null
                 )
             }.sortedBy{it.time}.asReversed()
             //新しい順に並べる

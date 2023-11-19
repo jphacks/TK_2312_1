@@ -42,12 +42,13 @@ class AnalyzeToPRepository() {
 
 
 
-    suspend fun analyzeToP(packageName: String): Result<RiskyClausesResponse> {
+    suspend fun analyzeToP(packageName: String): Result<RiskyClauseWithURLResponse> {
         when(val privacyLinkResponse = makeGetToPRequest(packageName)) {
             is Result.Success<ToPLinkResponse> -> {
-                return when(val rawTextResponse =  parsePrivacySite(privacyLinkResponse.data.url)) {
+                val url = privacyLinkResponse.data.url
+                return when(val rawTextResponse =  parsePrivacySite(url)) {
                     is Result.Success<RawToPResponse> -> {
-                        getRiskyClause(rawTextResponse.data.rawText)
+                        getRiskyClause(rawTextResponse.data.rawText, url)
                     }
 
                     else -> {
@@ -84,7 +85,7 @@ class AnalyzeToPRepository() {
         }
     }
 
-    private suspend fun getRiskyClause(rawText: String): Result<RiskyClausesResponse> {
+    private suspend fun getRiskyClause(rawText: String, url:String): Result<RiskyClauseWithURLResponse> {
         val bearerToken: String = BuildConfig.OPENAI_APIKEY
         val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
         val client = OkHttpClient.Builder()
@@ -109,13 +110,13 @@ class AnalyzeToPRepository() {
 
         val apiService = retrofit.create(ChatGptService::class.java)
         return withContext(Dispatchers.IO) {
-            val rawTextList = splitJapaneseText(rawText, 1500)
+            val rawTextList = splitJapaneseText(rawText, 2000)
             val jobList = rawTextList.map {
                 async { askGpt(it, apiService, moshi) }
             }
             val results = jobList.awaitAll()
             val joinedList = results.flatten()
-            return@withContext Result.Success(RiskyClausesResponse(joinedList))
+            return@withContext Result.Success(RiskyClauseWithURLResponse(joinedList, url))
         }
     }
 
@@ -237,6 +238,11 @@ data class RawToPResponse(
 )
 
 data class RiskyClausesResponse(
-    val clauseList: List<Clause>
+    val clauseList: List<Clause>,
+)
+
+data class RiskyClauseWithURLResponse(
+    val clauseList: List<Clause>,
+    val url: String
 )
 
